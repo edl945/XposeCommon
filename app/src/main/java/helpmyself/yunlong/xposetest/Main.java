@@ -40,9 +40,22 @@ import static de.robv.android.xposed.XposedHelpers.newInstance;
 
 public class Main implements IXposedHookLoadPackage {
 
+    public static final String WECHAT_PACKAGE_NAME = "com.tencent.mm";
+    private static String wechatVersion = "";
+
     @Override
     public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
 
-    }
+        if (lpparam.packageName.equals(WECHAT_PACKAGE_NAME)) {
+            if (isEmpty(wechatVersion)) {
+                Context context = (Context) callMethod(callStaticMethod(findClass("android.app.ActivityThread", null), "currentActivityThread", new Object[0]), "getSystemContext", new Object[0]);
+                String versionName = context.getPackageManager().getPackageInfo(lpparam.packageName, 0).versionName;
+                log("Found wechat version:" + versionName);
+                wechatVersion = versionName;
+                VersionParam.init(versionName);
+            }
+        }
+
+    }//end of handleLoadPackage
 
 }
